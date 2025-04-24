@@ -4,12 +4,33 @@ from PIL import Image
 import numpy as np
 import io
 
-st.set_page_config(page_title="Conversor para Desenho", layout="centered")
+st.set_page_config(page_title="Conversor de Imagem para Desenho", layout="centered")
 
-st.title("🎨 Conversor de Imagem para Desenho (Sketch Effect)")
-st.write("Envie uma imagem e veja a mágica acontecer!")
+st.markdown(
+    """
+    <style>
+        .title {
+            text-align: center;
+            font-size: 2.2em;
+            color: #4B8BBE;
+        }
+        .subtitle {
+            text-align: center;
+            color: #555;
+        }
+        footer {
+            visibility: hidden;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
-uploaded_file = st.file_uploader("📷 Envie sua imagem", type=["jpg", "jpeg", "png"])
+st.markdown('<div class="title">🎨 Conversor de Imagem para Desenho</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Transforme suas fotos em desenhos com 1 clique!</div>', unsafe_allow_html=True)
+st.markdown("---")
+
+uploaded_file = st.file_uploader("📷 Envie sua imagem aqui (jpg, jpeg, png)", type=["jpg", "jpeg", "png"])
 
 def converter_para_desenho(imagem):
     imagem_rgb = cv2.cvtColor(np.array(imagem), cv2.COLOR_RGB2BGR)
@@ -21,15 +42,29 @@ def converter_para_desenho(imagem):
 
 if uploaded_file is not None:
     imagem = Image.open(uploaded_file)
-    st.image(imagem, caption="Imagem Original", use_column_width=True)
 
-    desenho = converter_para_desenho(imagem)
-    st.image(desenho, caption="Imagem Estilo Desenho", use_column_width=True, clamp=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("📸 Imagem Original")
+        st.image(imagem, use_column_width=True)
 
-    # Download da imagem convertida
+    with col2:
+        st.subheader("🖊️ Estilo Desenho")
+        desenho = converter_para_desenho(imagem)
+        st.image(desenho, use_column_width=True, clamp=True)
+
     resultado = Image.fromarray(desenho)
     buf = io.BytesIO()
     resultado.save(buf, format="PNG")
-    byte_imagem = buf.getvalue()
 
-    st.download_button("⬇️ Baixar Imagem Estilo Desenho", data=byte_imagem, file_name="desenho.png", mime="image/png")
+    st.download_button(
+        "⬇️ Baixar Imagem com Efeito Desenho",
+        data=buf.getvalue(),
+        file_name="desenho.png",
+        mime="image/png"
+    )
+
+    st.success("Imagem convertida com sucesso!")
+
+st.markdown("---")
+st.markdown("<div style='text-align: center; color: #888;'>© 2025 - Desenvolvido por Chance Pascoal Fevereiro</div>", unsafe_allow_html=True)
